@@ -52,25 +52,26 @@ def main():
         if len(os.listdir(destination)) == 0:
             splitlenProcess = subprocess.Popen(f"{splitlen_bin} {destination} < {wordlist}", shell=True).wait()
         else:
-            if not os.path.isdir("/tmp/splitlen"):
-                os.mkdir("/tmp/splitlen")
-            splitlenProcess = subprocess.Popen(f"{splitlen_bin} /tmp/splitlen < {wordlist}", shell=True).wait()
+            if not os.path.isdir("my_splits/splitlen"):
+                os.mkdir("my_splits/splitlen")
+            splitlenProcess = subprocess.Popen(f"{splitlen_bin} my_splits/splitlen < {wordlist}", shell=True).wait()
 
             # Copy unique passwords into "optimized" <output directory>
-            for f in os.listdir("/tmp/splitlen"):
+            for f in os.listdir("my_splits/splitlen"):
                 if not os.path.isfile(f"{destination}/{f}"):
-                    shutil.copyfile(f"/tmp/splitlen/{f}", f"{destination}/{f}")
+                    shutil.copyfile(f"my_splits/splitlen/{f}", f"{destination}/{f}")
                 else:
-                    rliProcess = subprocess.Popen([rli_bin, f"/tmp/splitlen/{f}", "/tmp/splitlen.out", f"{destination}/{f}"]).wait()
-                    if lineCount("/tmp/splitlen.out") > 0:
-                        with open("/tmp/splitlen.out", encoding="iso-8859-15") as splitlen_file, open(f"{destination}/{f}", "a") as destination_file:
-                                destination_file.write(splitlen_file.read())
+                    rliProcess = subprocess.Popen([rli_bin, f"my_splits/splitlen/{f}", "my_splits/splitlen.out", f"{destination}/{f}"]).wait()
+                    if lineCount("my_splits/splitlen.out") > 0:
+                        with open("my_splits/splitlen.out", "r", errors="replace") as splitlen_file, open(f"{destination}/{f}", "a") as destination_file:
+                            for line in splitlen_file.read().splitlines():
+                                destination_file.write(f"{line.strip()}\n")
 
     # Clean Up
-    if os.path.isdir("/tmp/splitlen"):
-        shutil.rmtree('/tmp/splitlen')
-    if os.path.isfile("/tmp/splitlen.out"):
-        os.remove("/tmp/splitlen.out")
+    if os.path.isdir("my_splits/splitlen"):
+        shutil.rmtree('my_splits/splitlen')
+    if os.path.isfile("my_splits/splitlen.out"):
+        os.remove("my_splits/splitlen.out")
 
 
 # Standard boilerplate to call the main() function
